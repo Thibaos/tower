@@ -1,6 +1,9 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
-use bevy::prelude::{Component, Vec3};
+use bevy::{
+    log::info,
+    prelude::{Component, Vec3},
+};
 
 /// A component to store the health points of an entity
 #[derive(Component, Debug)]
@@ -20,6 +23,89 @@ pub struct CharacterDash {
     pub cooldown_in_ms: u128,
     pub duration_in_ms: u128,
     pub direction: Vec3,
+}
+
+/// A component that allows an attack ability, with a specific cooldown and duration
+#[derive(Component)]
+pub struct AttackController {
+    // should the attack be triggered now
+    allowed: bool,
+    // should the attack be triggered when the cooldown expires
+    future_requested: bool,
+    // the last triggered attack instant
+    last_active_instant: Instant,
+    // the cooldown
+    cooldown_in_secs: f64,
+    // unit factor of the allowed future request window
+    request_window_factor: f64,
+}
+
+impl Default for AttackController {
+    fn default() -> Self {
+        Self {
+            allowed: false,
+            future_requested: false,
+            last_active_instant: Instant::now(),
+            cooldown_in_secs: 0.0,
+            request_window_factor: 0.25,
+        }
+    }
+}
+
+impl AttackController {
+    pub fn new(cooldown_in_secs: f64) -> Self {
+        Self {
+            cooldown_in_secs,
+            ..Default::default()
+        }
+    }
+
+    pub fn is_future_requested(&self) -> bool {
+        self.future_requested
+    }
+
+    pub fn consume_attack(&mut self) -> bool {
+        if self.allowed {
+            self.reset();
+            return true;
+        }
+
+        return false;
+    }
+
+    pub fn request_attack(&mut self) {
+        let now = Instant::now();
+
+        if self.allowed || now.cmp(&self.last_active_instant).is_le() {
+            return;
+        }
+
+        let duration = now.duration_since(self.last_active_instant).as_secs_f64();
+
+        if duration >= self.cooldown_in_secs {
+            self.allowed = true;
+        } else if !self.future_requested
+            && duration
+                >= self.cooldown_in_secs - (self.cooldown_in_secs * self.request_window_factor)
+        {
+            #[cfg(debug_assertions)]
+            {
+                info!(
+                    "attack requested after {}s, cooldown is {}s, max window is {}s",
+                    duration,
+                    self.cooldown_in_secs,
+                    self.cooldown_in_secs * self.request_window_factor
+                );
+            }
+            self.future_requested = true;
+        }
+    }
+
+    fn reset(&mut self) {
+        self.allowed = false;
+        self.future_requested = false;
+        self.last_active_instant = Instant::now();
+    }
 }
 
 /// A marker component for the player's shape so we can query it separately from its parent

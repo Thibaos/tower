@@ -7,6 +7,7 @@ use bevy_hanabi::{EffectAsset, EffectSpawner, ParticleEffectBundle};
 use bevy_rapier3d::prelude::{Collider, ExternalImpulse, KinematicCharacterController, RigidBody};
 use smooth_bevy_cameras::controllers::orbit::OrbitCameraController;
 
+use crate::components::AttackController;
 use crate::data::effects::new_effect_asset;
 use crate::{
     components::{CharacterDash, LifeSpan, Player, PlayerMesh, ShotProjectile},
@@ -120,7 +121,7 @@ fn player_attack(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut player_query: Query<&Transform, With<Player>>,
+    mut player_query: Query<(&Transform, &mut AttackController), With<Player>>,
     mut player_mesh_query: Query<&Transform, With<PlayerMesh>>,
     mouse: Res<ButtonInput<MouseButton>>,
 ) {
@@ -130,7 +131,7 @@ fn player_attack(
         return;
     }
 
-    let holder_transform = query_result.unwrap();
+    let (player_transform, mut attack_controller) = query_result.unwrap();
 
     let mesh_result = player_mesh_query.get_single_mut();
     if let Err(reason) = mesh_result {
@@ -140,8 +141,12 @@ fn player_attack(
 
     let mesh_transform = mesh_result.unwrap();
 
-    if mouse.just_pressed(MouseButton::Left) {
-        let position = holder_transform.translation;
+    if attack_controller.is_future_requested() || mouse.pressed(MouseButton::Left) {
+        attack_controller.request_attack();
+    }
+
+    if attack_controller.consume_attack() {
+        let position = player_transform.translation;
         let forward = mesh_transform.forward();
         commands.spawn((
             PbrBundle {

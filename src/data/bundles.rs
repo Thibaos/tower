@@ -17,7 +17,7 @@ use bevy::{
 use bevy_rapier3d::prelude::{CharacterLength, Collider, KinematicCharacterController, RigidBody};
 use smooth_bevy_cameras::controllers::orbit::{OrbitCameraBundle, OrbitCameraController};
 
-use crate::components::{CharacterDash, Player, PlayerMesh, ZoomLevel};
+use crate::components::{AttackController, CharacterDash, Player, PlayerMesh, ZoomLevel};
 
 #[derive(Bundle, Default)]
 pub struct PlayerBundle {
@@ -27,6 +27,7 @@ pub struct PlayerBundle {
     pub controller: KinematicCharacterController,
     pub rigidbody: RigidBody,
     pub dash: CharacterDash,
+    pub attack_controller: AttackController,
     pub marker: Player,
 }
 
@@ -51,6 +52,7 @@ impl PlayerBundle {
                 duration_in_ms: 200,
                 ..default()
             },
+            attack_controller: AttackController::new(0.5),
             marker: Player,
         }
     }
