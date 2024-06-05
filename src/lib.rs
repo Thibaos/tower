@@ -42,7 +42,7 @@ impl Plugin for GamePlugin {
         {
             app.add_plugins((
                 bevy::diagnostic::LogDiagnosticsPlugin::default(),
-                bevy_inspector_egui::quick::WorldInspectorPlugin::new(),
+                // bevy_inspector_egui::quick::WorldInspectorPlugin::new(),
                 // bevy::diagnostic::FrameTimeDiagnosticsPlugin::default(),
                 // bevy_rapier3d::render::RapierDebugRenderPlugin::default(),
             ));
