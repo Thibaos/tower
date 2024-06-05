@@ -1,0 +1,36 @@
+[package]
+name = "tower"
+version = "0.1.0"
+edition = "2021"
+publish = false
+exclude = ["dist", "build", "assets", "credits"]
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[dependencies]
+bevy = { version = "0.13", features = [
+    "dynamic_linking",
+    "bevy_asset",
+    "bevy_winit",
+    "png",
+    "x11",
+] }
+bevy_kira_audio = { version = "0.19" }
+bevy_asset_loader = { version = "0.20" }
+rand = { version = "0.8" }
+bevy_flycam = "0.13"
+bevy_rapier3d = { version = "0.26", features = ["debug-render"] }
+bevy_egui = "0.27"
+bevy-inspector-egui = "0.24"
+smooth-bevy-cameras = "0.11"
+bevy_hanabi = "0.11"
+
+winit = { version = "0.29", default-features = false }
+image = { version = "0.25", default-features = false }
+
+[build-dependencies]
+embed-resource = "2.4"
