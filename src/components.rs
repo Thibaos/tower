@@ -1,9 +1,8 @@
 use std::time::{Duration, Instant};
 
-use bevy::{
-    log::info,
-    prelude::{Component, Vec3},
-};
+#[cfg(debug_assertions)]
+use bevy::log::info;
+use bevy::prelude::{Component, Vec3};
 
 /// A component to store the health points of an entity
 #[derive(Component, Debug)]
