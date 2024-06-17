@@ -1,8 +1,7 @@
-use std::time::{Duration, Instant};
-
 #[cfg(debug_assertions)]
 use bevy::log::info;
 use bevy::prelude::{Component, Vec3};
+use wasm_timer::SystemTime;
 
 /// A component to store the health points of an entity
 #[derive(Component, Debug)]
@@ -18,9 +17,9 @@ pub struct CharacterDash {
     pub requested: bool,
     pub started: bool,
     pub progress: f32,
-    pub last_update: Duration,
-    pub cooldown_in_ms: u128,
-    pub duration_in_ms: u128,
+    pub last_update_in_secs: f64,
+    pub cooldown_in_secs: f64,
+    pub duration_in_secs: f64,
     pub direction: Vec3,
 }
 
@@ -32,7 +31,7 @@ pub struct AttackController {
     // should the attack be triggered when the cooldown expires
     future_requested: bool,
     // the last triggered attack instant
-    last_active_instant: Instant,
+    last_active_instant: SystemTime,
     // the cooldown
     cooldown_in_secs: f64,
     // unit factor of the allowed future request window
@@ -44,7 +43,7 @@ impl Default for AttackController {
         Self {
             allowed: false,
             future_requested: false,
-            last_active_instant: Instant::now(),
+            last_active_instant: SystemTime::now(),
             cooldown_in_secs: 0.0,
             request_window_factor: 0.25,
         }
@@ -73,13 +72,16 @@ impl AttackController {
     }
 
     pub fn request_attack(&mut self) {
-        let now = Instant::now();
+        let now = SystemTime::now();
 
         if self.allowed || now.cmp(&self.last_active_instant).is_le() {
             return;
         }
 
-        let duration = now.duration_since(self.last_active_instant).as_secs_f64();
+        let duration = now
+            .duration_since(self.last_active_instant)
+            .unwrap()
+            .as_secs_f64();
 
         if duration >= self.cooldown_in_secs {
             self.allowed = true;
@@ -103,7 +105,7 @@ impl AttackController {
     fn reset(&mut self) {
         self.allowed = false;
         self.future_requested = false;
-        self.last_active_instant = Instant::now();
+        self.last_active_instant = SystemTime::now();
     }
 }
 
@@ -114,13 +116,6 @@ pub struct PlayerMesh;
 /// A marker component for the enemies game objects
 #[derive(Component)]
 pub struct Enemy;
-
-/// A component for entities which should disappear after a certain amount of time
-#[derive(Component)]
-pub struct LifeSpan {
-    pub birth: Duration,
-    pub life_time: Duration,
-}
 
 /// A single value component to keep track of the zoom level of the third person camera
 #[derive(Component, Debug, Default)]

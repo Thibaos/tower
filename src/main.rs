@@ -1,24 +1,24 @@
 // disable console on windows for release builds
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use bevy::log::LogPlugin;
 use bevy::prelude::*;
-use bevy::render::settings::{WgpuFeatures, WgpuSettings};
+use bevy::render::settings::WgpuSettings;
 use bevy::render::RenderPlugin;
 use bevy::window::close_on_esc;
+#[cfg(not(target_family = "wasm"))]
 use bevy::winit::WinitWindows;
 use bevy::DefaultPlugins;
-use std::io::Cursor;
 use tower::GamePlugin;
+#[cfg(not(target_family = "wasm"))]
 use winit::window::Icon;
 
 fn main() {
-    let mut wgpu_settings = WgpuSettings::default();
-    wgpu_settings
-        .features
-        .set(WgpuFeatures::VERTEX_WRITABLE_STORAGE, true);
+    let wgpu_settings = WgpuSettings::default();
 
-    App::new()
-        .insert_resource(Msaa::default())
+    let mut app = App::new();
+
+    app.insert_resource(Msaa::default())
         .insert_resource(ClearColor(Color::rgb(0.3, 0.3, 0.3)))
         .add_plugins((
             DefaultPlugins
@@ -38,15 +38,20 @@ fn main() {
                     synchronous_pipeline_compilation: false,
                 }),
             GamePlugin,
-        ))
-        .add_systems(Startup, set_window_icon)
-        .add_systems(Update, close_on_esc)
-        .run();
+        ));
+
+    #[cfg(not(target_family = "wasm"))]
+    app.add_systems(Startup, set_window_icon);
+
+    app.add_systems(Update, close_on_esc);
+
+    app.run();
 }
 
+#[cfg(not(target_family = "wasm"))]
 // Sets the icon on windows and X11
 fn set_window_icon(windows: NonSend<WinitWindows>) {
-    let icon_buf = Cursor::new(include_bytes!(
+    let icon_buf = std::io::Cursor::new(include_bytes!(
         "../build/macos/AppIcon.iconset/icon_256x256.png"
     ));
     if let Ok(image) = image::load(icon_buf, image::ImageFormat::Png) {

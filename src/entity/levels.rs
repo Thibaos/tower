@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use bevy::{math, prelude::*};
 use bevy_rapier3d::prelude::{Collider, Damping, ExternalForce, RapierContext, RigidBody};
 use rand::Rng;
@@ -8,6 +6,8 @@ use crate::{
     components::{BossHealth, Enemy, Health, LevelLocation, Player, ShotProjectile},
     GameState,
 };
+
+const PI: f32 = 3.1415927;
 
 const ROOM_WIDTH: f32 = 50.;
 const HALF_ROOM_WIDTH: f32 = ROOM_WIDTH / 2.;

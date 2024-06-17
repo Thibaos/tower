@@ -1,3 +1,5 @@
+#![cfg(not(target_family = "wasm"))]
+
 use bevy::prelude::{Vec2, Vec3, Vec4};
 use bevy_hanabi::{
     Attribute, BinaryOperator, BuiltInOperator, ColorOverLifetimeModifier, EffectAsset, Gradient,

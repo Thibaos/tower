@@ -48,8 +48,8 @@ impl PlayerBundle {
             },
             rigidbody: RigidBody::KinematicVelocityBased,
             dash: CharacterDash {
-                cooldown_in_ms: 1200,
-                duration_in_ms: 200,
+                cooldown_in_secs: 1.2,
+                duration_in_secs: 1.0,
                 ..default()
             },
             attack_controller: AttackController::new(0.5),

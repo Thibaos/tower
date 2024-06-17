@@ -1,16 +1,18 @@
-use std::time::Duration;
-
 use bevy::math;
 use bevy::window::CursorGrabMode;
 use bevy::{prelude::*, window::PrimaryWindow};
+use bevy_egui::egui::emath::ease_in_ease_out;
+#[cfg(not(target_family = "wasm"))]
 use bevy_hanabi::{EffectAsset, EffectSpawner, ParticleEffectBundle};
 use bevy_rapier3d::prelude::{Collider, ExternalImpulse, KinematicCharacterController, RigidBody};
 use smooth_bevy_cameras::controllers::orbit::OrbitCameraController;
 
 use crate::components::AttackController;
+#[cfg(not(target_family = "wasm"))]
 use crate::data::effects::new_effect_asset;
+use crate::interpolation_functions::ease_out_expo;
 use crate::{
-    components::{CharacterDash, LifeSpan, Player, PlayerMesh, ShotProjectile},
+    components::{CharacterDash, Player, PlayerMesh, ShotProjectile},
     data::bundles::{PlayerBundle, PlayerMeshBundle, ThirdPersonCameraBundle},
     interpolation_functions::lerp,
     GameState,
@@ -21,21 +23,29 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut effects: ResMut<Assets<EffectAsset>>,
+    #[cfg(not(target_family = "wasm"))] mut effects: ResMut<Assets<EffectAsset>>,
 ) {
     let player_transform = Transform::from_xyz(0., 1., -10.);
 
+    #[cfg(not(target_family = "wasm"))]
     let effect = new_effect_asset();
+    #[cfg(not(target_family = "wasm"))]
     let effect_handle = effects.add(effect);
 
+    dbg!("{effect_handle}");
+
     // spawn player
-    let player_id = commands
-        .spawn(PlayerBundle::new(player_transform))
-        .with_children(|node| {
+    let mut player = commands.spawn(PlayerBundle::new(player_transform));
+
+    #[cfg(not(target_family = "wasm"))]
+    {
+        player.with_children(|node| {
             node.spawn(ParticleEffectBundle::new(effect_handle))
                 .insert(Name::new("player_dash_effect"));
-        })
-        .id();
+        });
+    }
+
+    let player_id = player.id();
 
     // player mesh
     commands
@@ -98,11 +108,15 @@ fn player_movement(
 
     if player_dash.started {
         player_dash.progress +=
-            time.delta().as_millis() as f32 * (1. / player_dash.duration_in_ms as f32);
+            (time.delta().as_secs_f64() * (1. / player_dash.duration_in_secs)) as f32;
         if player_dash.progress >= 1. {
             player_dash.started = false;
         }
-        let speed = lerp(MAX_SPEED, BASE_SPEED * 2., player_dash.progress);
+        let speed = lerp(
+            MAX_SPEED,
+            BASE_SPEED * 2.,
+            ease_out_expo(player_dash.progress),
+        );
         player_controller.translation = Some(player_dash.direction * speed);
     } else {
         player_dash.direction = velocity;
@@ -117,7 +131,6 @@ fn player_movement(
 /// Shoot a ball with a dynamic rigidbody as a child entity from the player if the left mouse button is just pressed,
 /// that auto-despawns after 5 seconds
 fn player_attack(
-    time: Res<Time>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -169,10 +182,6 @@ fn player_attack(
                 impulse: forward.into(),
                 ..default()
             },
-            LifeSpan {
-                birth: time.elapsed(),
-                life_time: Duration::from_secs(4),
-            },
             ShotProjectile,
         ));
     }
@@ -181,7 +190,7 @@ fn player_attack(
 /// Start a dash animation for the player if it is requested and allowed
 fn trigger_dash_on_request(
     mut entities_with_dash_ability: Query<(&mut CharacterDash, &Children), With<Player>>,
-    mut effect_spawners: Query<&mut EffectSpawner>,
+    #[cfg(not(target_family = "wasm"))] mut effect_spawners: Query<&mut EffectSpawner>,
     time: Res<Time>,
 ) {
     if entities_with_dash_ability.is_empty() {
@@ -190,17 +199,18 @@ fn trigger_dash_on_request(
 
     for (mut dash_component, children) in entities_with_dash_ability.iter_mut() {
         if dash_component.requested && !dash_component.started {
-            let now = time.elapsed();
-            if dash_component.last_update.as_millis() + dash_component.cooldown_in_ms
-                <= now.as_millis()
-            {
-                dash_component.last_update = now;
+            let now = time.elapsed_seconds_f64();
+            if dash_component.last_update_in_secs + dash_component.cooldown_in_secs <= now {
+                dash_component.last_update_in_secs = now;
                 dash_component.requested = false;
                 dash_component.started = true;
                 dash_component.progress = 0.;
 
-                if let Ok(mut spawner) = effect_spawners.get_mut(children[0]) {
-                    spawner.reset();
+                #[cfg(not(target_family = "wasm"))]
+                {
+                    if let Ok(mut spawner) = effect_spawners.get_mut(children[0]) {
+                        spawner.reset();
+                    }
                 }
             }
             dash_component.requested = false;

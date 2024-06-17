@@ -1,13 +1,15 @@
 mod components;
 mod data;
-mod entities;
+mod entity;
 mod interpolation_functions;
-mod loading;
-mod menu;
+mod state;
 
 use bevy::app::App;
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::NoUserData;
+use bevy_rapier3d::prelude::*;
+
+use state::loading;
+use state::menu;
 
 // This example game uses States to separate logic
 // See https://bevy-cheatbook.github.io/programming/states.html
@@ -30,12 +32,13 @@ impl Plugin for GamePlugin {
         app.init_state::<GameState>().add_plugins((
             loading::Assets,
             smooth_bevy_cameras::LookTransformPlugin,
-            bevy_rapier3d::prelude::RapierPhysicsPlugin::<NoUserData>::default(),
+            RapierPhysicsPlugin::<NoUserData>::default(),
+            #[cfg(not(target_family = "wasm"))]
             bevy_hanabi::HanabiPlugin,
             menu::Start,
-            entities::character::PlayerPlugin,
-            entities::camera::ThirdPersonPlugin,
-            entities::levels::SpawnBasicPlugin,
+            entity::character::PlayerPlugin,
+            entity::camera::ThirdPersonPlugin,
+            entity::levels::SpawnBasicPlugin,
         ));
 
         #[cfg(debug_assertions)]
@@ -44,7 +47,7 @@ impl Plugin for GamePlugin {
                 bevy::diagnostic::LogDiagnosticsPlugin::default(),
                 // bevy_inspector_egui::quick::WorldInspectorPlugin::new(),
                 // bevy::diagnostic::FrameTimeDiagnosticsPlugin::default(),
-                // bevy_rapier3d::render::RapierDebugRenderPlugin::default(),
+                bevy_rapier3d::render::RapierDebugRenderPlugin::default(),
             ));
         }
     }
