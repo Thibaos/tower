@@ -7,7 +7,7 @@ use crate::{
     GameState,
 };
 
-const PI: f32 = 3.1415927;
+pub const PI: f32 = 3.1415927;
 
 const ROOM_WIDTH: f32 = 50.;
 const HALF_ROOM_WIDTH: f32 = ROOM_WIDTH / 2.;

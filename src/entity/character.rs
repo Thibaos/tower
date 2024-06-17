@@ -1,7 +1,6 @@
 use bevy::math;
 use bevy::window::CursorGrabMode;
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_egui::egui::emath::ease_in_ease_out;
 #[cfg(not(target_family = "wasm"))]
 use bevy_hanabi::{EffectAsset, EffectSpawner, ParticleEffectBundle};
 use bevy_rapier3d::prelude::{Collider, ExternalImpulse, KinematicCharacterController, RigidBody};
@@ -10,11 +9,10 @@ use smooth_bevy_cameras::controllers::orbit::OrbitCameraController;
 use crate::components::AttackController;
 #[cfg(not(target_family = "wasm"))]
 use crate::data::effects::new_effect_asset;
-use crate::interpolation_functions::ease_out_expo;
+use crate::interpolation_functions::ease_out_sine;
 use crate::{
     components::{CharacterDash, Player, PlayerMesh, ShotProjectile},
     data::bundles::{PlayerBundle, PlayerMeshBundle, ThirdPersonCameraBundle},
-    interpolation_functions::lerp,
     GameState,
 };
 
@@ -112,11 +110,7 @@ fn player_movement(
         if player_dash.progress >= 1. {
             player_dash.started = false;
         }
-        let speed = lerp(
-            MAX_SPEED,
-            BASE_SPEED * 2.,
-            ease_out_expo(player_dash.progress),
-        );
+        let speed = MAX_SPEED * (1.0 - ease_out_sine(player_dash.progress));
         player_controller.translation = Some(player_dash.direction * speed);
     } else {
         player_dash.direction = velocity;
