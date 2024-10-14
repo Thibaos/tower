@@ -6,4 +6,6 @@ Shots and dashes have cooldowns (not visible yet). Shots produce physical bullet
 
 If a bullet touches the enemy box, it deals one damage point. The enemy has a total health equal to the number of the level. When the enemy dies, a new level is created right above the previous one, with a new hue-shifted color. The player is then teleported to the next level. There is no level limit for now.
 
-![game image](level1.png)
+![level 1](level1.png)
+
+![level 5](level5.png)
