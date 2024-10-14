@@ -1,6 +1,6 @@
 # Tower game
 
-Simple TPS game with Bevy 0.13. Move with WASD, dash with SPACE, look around, zoom in and out with the mouse wheel, left click to shoot.
+Simple TPS game with Bevy. Move with WASD, dash with SPACE, look around, zoom in and out with the mouse wheel, left click to shoot.
 
 Shots and dashes have cooldowns (not visible yet). Shots produce physical bullets that collide with the environment and the enemy.
 

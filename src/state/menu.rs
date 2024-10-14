@@ -28,8 +28,8 @@ struct ButtonColors {
 impl Default for ButtonColors {
     fn default() -> Self {
         Self {
-            normal: Color::rgb(0.15, 0.15, 0.15),
-            hovered: Color::rgb(0.25, 0.25, 0.25),
+            normal: Color::srgb(0.15, 0.15, 0.15),
+            hovered: Color::srgb(0.25, 0.25, 0.25),
         }
     }
 }
@@ -62,7 +62,7 @@ fn setup_menu(
                         style: TextStyle {
                             font: font_assets.fira_sans.clone(),
                             font_size: 40.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
+                            color: Color::srgb(0.9, 0.9, 0.9),
                         },
                     }],
                     linebreak_behavior: bevy::text::BreakLineOn::NoWrap,

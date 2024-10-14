@@ -199,19 +199,14 @@ fn setup_levels(
         half_size: Vec3::ONE * 2.0,
     }));
     let enemy_mat = EnemyMat(materials.add(StandardMaterial {
-        base_color: Color::rgba(1., 1., 1., 0.4),
-        emissive: Color::WHITE,
+        base_color: Color::srgba(1., 1., 1., 0.4),
+        emissive: Color::WHITE.into(),
         alpha_mode: AlphaMode::Blend,
         ..default()
     }));
 
     let structure_mat = materials.add(StandardMaterial {
-        base_color: Color::Hsla {
-            hue: 360. / 12. * level_index.0 as f32,
-            saturation: 0.8,
-            lightness: 0.4,
-            alpha: 1.,
-        },
+        base_color: Color::hsla(360. / 12. * level_index.0 as f32, 0.8, 0.4, 1.),
         perceptual_roughness: 0.9,
         ..default()
     });
@@ -298,7 +293,7 @@ fn setup_levels(
                                 ..default()
                             },
                             border_color: Color::BLACK.into(),
-                            background_color: Color::rgba(0.3, 0.3, 0.4, 0.8).into(),
+                            background_color: Color::srgba(0.3, 0.3, 0.4, 0.8).into(),
                             ..default()
                         })
                         .with_children(|health_bar_background| {
@@ -310,7 +305,7 @@ fn setup_levels(
                                         height: Val::Percent(100.),
                                         ..default()
                                     },
-                                    background_color: Color::rgba(0.6, 0.2, 0.2, 0.95).into(),
+                                    background_color: Color::srgba(0.6, 0.2, 0.2, 0.95).into(),
                                     ..default()
                                 },
                                 BossHealth,
@@ -403,12 +398,7 @@ fn tp_player_on_level_change(
                 let (mut transform, _) = player_query.single_mut();
 
                 let structure_mat = materials.add(StandardMaterial {
-                    base_color: Color::Hsla {
-                        hue: 360. / 16. * *index as f32,
-                        saturation: 0.8,
-                        lightness: 0.4,
-                        alpha: 1.,
-                    },
+                    base_color: Color::hsla(360. / 16. * *index as f32, 0.8, 0.4, 1.),
                     perceptual_roughness: 0.9,
                     ..default()
                 });

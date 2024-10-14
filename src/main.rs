@@ -4,7 +4,6 @@
 use bevy::prelude::*;
 use bevy::render::settings::WgpuSettings;
 use bevy::render::RenderPlugin;
-use bevy::window::close_on_esc;
 #[cfg(not(target_family = "wasm"))]
 use bevy::winit::WinitWindows;
 use bevy::DefaultPlugins;
@@ -12,13 +11,29 @@ use tower::GamePlugin;
 #[cfg(not(target_family = "wasm"))]
 use winit::window::Icon;
 
+pub fn close_on_esc(
+    mut commands: Commands,
+    focused_windows: Query<(Entity, &Window)>,
+    input: Res<ButtonInput<KeyCode>>,
+) {
+    for (window, focus) in focused_windows.iter() {
+        if !focus.focused {
+            continue;
+        }
+
+        if input.just_pressed(KeyCode::Escape) {
+            commands.entity(window).despawn();
+        }
+    }
+}
+
 fn main() {
     let wgpu_settings = WgpuSettings::default();
 
     let mut app = App::new();
 
     app.insert_resource(Msaa::default())
-        .insert_resource(ClearColor(Color::rgb(0.3, 0.3, 0.3)))
+        .insert_resource(ClearColor(Color::srgb(0.3, 0.3, 0.3)))
         .add_plugins((
             DefaultPlugins
                 .set(WindowPlugin {
