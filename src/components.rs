@@ -68,7 +68,7 @@ impl AttackController {
             return true;
         }
 
-        return false;
+        false
     }
 
     pub fn request_attack(&mut self) {

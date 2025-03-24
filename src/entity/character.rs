@@ -157,10 +157,7 @@ fn player_attack(
         let forward = mesh_transform.forward();
         commands.spawn((
             PbrBundle {
-                mesh: meshes.add(math::primitives::Sphere {
-                    radius: 0.15,
-                    ..default()
-                }),
+                mesh: meshes.add(math::primitives::Sphere { radius: 0.15 }),
                 material: materials.add(StandardMaterial::default()),
                 transform: Transform::from_xyz(
                     position.x + forward.x,

@@ -1,3 +1,7 @@
+#![allow(clippy::too_many_arguments)]
+
+use std::f32::consts::PI;
+
 use bevy::{math, prelude::*};
 use bevy_rapier3d::prelude::{Collider, Damping, ExternalForce, RapierContext, RigidBody};
 use rand::Rng;
@@ -6,8 +10,6 @@ use crate::{
     components::{BossHealth, Enemy, Health, LevelLocation, Player, ShotProjectile},
     GameState,
 };
-
-pub const PI: f32 = 3.1415927;
 
 const ROOM_WIDTH: f32 = 50.;
 const HALF_ROOM_WIDTH: f32 = ROOM_WIDTH / 2.;
@@ -192,7 +194,6 @@ fn setup_levels(
     );
     let wall_mesh = WallMesh(meshes.add(math::primitives::Rectangle {
         half_size: Vec2::new(ROOM_WIDTH, ROOM_HEIGHT) / 2.0,
-        ..default()
     }));
 
     let enemy_mesh = EnemyMesh(meshes.add(math::primitives::Cuboid {
